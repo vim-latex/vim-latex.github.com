@@ -7,7 +7,7 @@
 " Description: insert mode template expander with cursor placement
 "              while preserving filetype indentation.
 "
-" Last Change: Thu Dec 19 04:00 AM 2002 PST
+" Last Change: Fri Dec 20 01:00 AM 2002 PST
 " 
 " Documentation: {{{
 "
@@ -245,7 +245,7 @@ function! IMAP_PutTextWithMovement(str, ...)
 	let text = a:str
 
 	" If there are no place holders, just return the text.
-	if text !~ '\V'.phs.'\{-}'.phe
+	if text !~ '\V'.phs.'\.\{-}'.phe
 		return text
 	endif
 
