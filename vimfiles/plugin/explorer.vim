@@ -1342,6 +1342,19 @@ function! s:EditAll()
   endwhile
 endfunction
 
+"---
+" Set up the autocommand to allow directories to be edited
+"
+augroup fileExplorer
+  au!
+  " Fill the window when entering the buffer; ":edit dir".
+  au BufEnter * call s:EditDir()
+  " Set the window variables after a split; ":split".
+  au WinEnter * if !exists("w:sortdirection") | call s:EditDir() | endif
+  " Fill the windows after Vim has started up.
+  au VimEnter * call s:EditAll()
+augroup end
+
 " restore 'cpo'
 let &cpo = s:cpo_save
 unlet s:cpo_save
