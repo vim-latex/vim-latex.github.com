@@ -28,6 +28,7 @@
 "                   TeX-Suite/Edit texrc
 "
 "        NOTE: This file is best viewed with Vim-6.0+ with folding turned on.
+"         CVS: $Id$
 "=============================================================================
 
 " ==============================================================================
@@ -73,6 +74,13 @@ else
 	TexLet g:Tex_DefaultTargetFormat = 'dvi'
 endif
 
+" A comma seperated list of formats which need multiple compilations to be
+" correctly compiled.
+TexLet g:Tex_MultipleCompileFormats = 'dvi'
+
+" Uncomment this line if you compile ps files via dvi files.
+" TexLet g:Tex_FormatDependency_ps = 'dvi,ps'
+
 " ------------------------------------------------------------------------------
 " Compiler rules {{{
 " This is the first thing you should customize. It is set up for most common
@@ -97,6 +105,8 @@ TexLet g:Tex_CompileRule_pdf = 'pdflatex -interaction=nonstopmode $*'
 " TexLet g:Tex_CompileRule_pdf = 'dvipdf $*.dvi'
 
 TexLet g:Tex_CompileRule_html = 'latex2html $*.tex'
+
+TexLet g:Tex_CompileRule_bib = 'bibtex $*'
 
 " }}}
 " ------------------------------------------------------------------------------ 
