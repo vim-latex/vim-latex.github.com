@@ -9,13 +9,6 @@
 "         CVS: $Id$
 " ============================================================================
 
-" generate a map for compiling multiple times.
-nnoremap <buffer> <Plug>Tex_CompileMultipleTimes  :call Tex_CompileMultipleTimes()<CR>
-
-if !hasmapto('<Plug>Tex_CompileMultipleTimes')
-	nmap <leader>lm <Plug>Tex_CompileMultipleTimes
-endif
-
 " Tex_CompileMultipleTimes: compile a latex file multiple times {{{
 " Description: compile a latex file multiple times to get cross-references asd
 "              right.
@@ -24,20 +17,8 @@ function! Tex_CompileMultipleTimes()
 		python compileMultipleTimes()
 	else
 		call Tex_CompileMultipleTimes_Vim()
-	endif
+			endif
 endfunction " }}}
-
-" TODO: these will need to go into texrc finally.
-" use python if available.
-let g:Tex_UsePython = 1
-" the system command which pulls in a file.
-if !exists('g:Tex_CatCmd')
-	if &shell =~ 'sh'
-		let g:Tex_CatCmd = 'cat'
-	else
-		let g:Tex_CatCmd = 'type'
-	endif
-endif
 
 if !has('python') || !g:Tex_UsePython
 	" Tex_GotoTempFile: open a temp file. reuse from next time on {{{
@@ -234,7 +215,7 @@ def compileMultipleTimes():
 
 		# The first time see if a .idx file has been created. If so we need to
 		# run makeindex.
-		if runCount == 0 and os.path.exists(mainFileName_root.'.idx'):
+		if runCount == 0 and os.path.exists(mainFileName_root + '.idx'):
 			idxFileName = mainFileName_root + '.idx'
 			idxlinesBefore = catFile(idxFileName)
 

@@ -61,6 +61,19 @@ com! -nargs=+ TexLet :call <SID>SafeLet(<q-args>)
 " ============================================================================== 
 
 " ==============================================================================
+" General settings {{{
+
+TexLet g:Tex_UsePython = 1
+
+" the system command which pulls in a file.
+if &shell =~ 'sh'
+	TexLet g:Tex_CatCmd = 'cat'
+else
+	TexLet g:Tex_CatCmd = 'type'
+endif
+
+" }}}
+" ==============================================================================
 " Rules: specifications of programs for compiling and viewing {{{
 "
 
@@ -88,10 +101,7 @@ TexLet g:Tex_MultipleCompileFormats = 'dvi'
 " As CompileFlags value you'd perhaps like to use, e.g., '-src-specials',
 " but it is known that it can sometimes give different results in the output,
 " so use it with care.
-let s:CompileFlags = ''
-TexLet g:Tex_EscapeChars = '{}\'
-TexLet g:Tex_CompileRule_dvi = 'latex ' . s:CompileFlags .
-                        \ ' -interaction=nonstopmode $*'
+TexLet g:Tex_CompileRule_dvi = 'latex -interaction=nonstopmode $*'
 
 TexLet g:Tex_CompileRule_ps = 'dvips -Ppdf -o $*.ps $*.dvi'
 
