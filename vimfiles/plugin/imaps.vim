@@ -7,7 +7,7 @@
 " Description: insert mode template expander with cursor placement
 "              while preserving filetype indentation.
 "
-" Last Change: Thu Dec 19 03:00 AM 2002 PST
+" Last Change: Thu Dec 19 04:00 AM 2002 PST
 " 
 " Documentation: {{{
 "
@@ -96,9 +96,17 @@
 " }}}
 
 " ==============================================================================
-" Script variables
-" ==============================================================================
-" {{{
+" Script Options / Variables
+" ============================================================================== 
+" Options {{{
+if !exists('g:Imap_StickyPlaceHolders')
+	let g:Imap_StickyPlaceHolders = 1
+endif
+if !exists('g:Imap_DeleteEmptyPlaceHolders')
+	let g:Imap_DeleteEmptyPlaceHolders = 1
+endif
+" }}}
+" Variables {{{
 " s:LHS_{ft}_{char} will be generated automatically.  It will look like
 " s:LHS_tex_o = 'fo\|foo\|boo' and contain all mapped sequences ending in "o".
 " s:Map_{ft}_{lhs} will be generated automatically.  It will look like
@@ -301,8 +309,6 @@ endfunction
 "
 function! IMAP_Jumpfunc(direction, inclusive)
 
-	let g:Imap_DeleteEmptyPlaceHolders = 0
-
 	" The user's placeholder settings.
 	let phsUser = s:PlaceHolderStart()
 	let pheUser = s:PlaceHolderEnd()
@@ -381,14 +387,6 @@ if !hasmapto('IMAP_Jumpfunc')
 	endif
 end
 " }}}
-" RestoreEncoding: restores file encoding to what it was originally {{{
-" Description: 
-function! RestoreEncoding()
-	if s:oldenc != 'latin1'
-		let &g:encoding = s:oldenc
-	endif
-	return ''
-endfunction " }}}
 
 nmap <silent> <script> <plug><+SelectRegion+> `<v`>
 
