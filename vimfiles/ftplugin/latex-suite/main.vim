@@ -3,7 +3,7 @@
 "	Maintainer: Srinath Avadhanula
 "		 Email: srinath@fastmail.fm
 "		   URL: 
-"  Last Change: Thu Dec 19 03:00 AM 2002 PST
+"  Last Change: Tue Dec 24 02:00 AM 2002 PST
 "
 " Help: 
 " Changes: {{{
@@ -373,12 +373,17 @@ nmap <silent> <script> <plug>cleanHistory :call Tex_CleanSearchHistory()<CR>
 " Description:  returns '' if .latexmain doesnt exist.
 "               i.e if main.tex.latexmain exists, then returns:
 "                   d:/path/to/main
-function! Tex_GetMainFileName()
+function! Tex_GetMainFileName(...)
+	if a:0 > 0
+		let modifier = a:1
+	else
+		let modifier = ':p:r:r'
+	endif
 	let curd = getcwd()
 	exe 'cd '.expand('%:p:h')
 	let lheadfile = glob('*.latexmain')
 	if lheadfile != ''
-		let lheadfile = fnamemodify(lheadfile, ':p:r:r')
+		let lheadfile = fnamemodify(lheadfile, modifier)
 	endif
 	exe 'cd '.curd
 	return lheadfile
@@ -428,6 +433,33 @@ endfunction
 function! Tex_ResetIncrementNumber(val)
 	let s:incnum = a:val
 endfunction " }}}
+" Functions for debugging {{{
+" Tex_Debug: appends the argument into s:debugString {{{
+" Description: 
+" 
+function! Tex_Debug(str)
+	if !exists('s:debugString')
+		let s:debugString = ''
+	endif
+	let s:debugString = s:debugString.a:str."\n"
+endfunction " }}}
+" Tex_PrintDebug: prings s:debugString {{{
+" Description: 
+" 
+function! Tex_PrintDebug()
+	if exists('s:debugString')
+		echo s:debugString
+	endif
+endfunction " }}}
+" Tex_ClearDebug: clears the s:debugString string {{{
+" Description: 
+" 
+function! Tex_ClearDebug()
+	if exists('s:debugString')
+		let s:debugString = ''
+	endif
+endfunction " }}}
+" }}}
 
 " source all the relevant files.
 exe 'source '.s:path.'/texmenuconf.vim'
