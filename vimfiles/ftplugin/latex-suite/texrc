@@ -3,7 +3,7 @@
 " 	     File: texrc.vim
 "      Author: Srinath Avadhanula
 "     Created: Mon Apr 01 11:00 AM 2002 PST
-" Last Change: Thu Dec 19 04:00 AM 2002 PST
+" Last Change: Sat Dec 21 06:00 PM 2002 PST
 "
 "  Description: This file contains resource configuration information for the
 "               latex-suite package.
@@ -42,13 +42,14 @@
 "                   TexLet g:varname = 1
 "                   TexLet g:varname = '1'
 "                   TexLet g:varname = 'foo bar'
+"                   TexLet g:varname = "foo\nbar"
 "                   TexLet g:varname = foo bar
 function! <SID>SafeLet(arg)
 	let name = matchstr(a:arg, '^\s*\zs\(\S\+\)\ze\s*=')
 	let value = matchstr(a:arg, '=\s*\zs.*\ze')
 	let value = substitute(value, '\s*$', '', '')
 	if !exists(name)
-		if value =~ "^'"
+		if value =~ "^'\\|^\""
 			exec "let ".name." = ".value
 		else
 			exe "let ".name." = value"
