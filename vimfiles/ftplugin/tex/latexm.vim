@@ -9,6 +9,135 @@
 "         CVS: $Id$
 " ============================================================================
 
+" generate a map for compiling multiple times.
+nnoremap <buffer> <Plug>Tex_CompileMultipleTimes  :call Tex_CompileMultipleTimes()<CR>
+
+if !hasmapto('<Plug>Tex_CompileMultipleTimes')
+	nmap <leader>lm <Plug>Tex_CompileMultipleTimes
+endif
+
+" Tex_CompileMultipleTimes: compile a latex file multiple times {{{
+" Description: compile a latex file multiple times to get cross-references asd
+"              right.
+function! Tex_CompileMultipleTimes()
+	if has('python') && g:Tex_UsePython
+		python compileLatex()
+	else
+		call Tex_CompileMultipleTimes_Vim()
+	endif
+endfunction " }}}
+
+" TODO: these will need to go into texrc finally.
+" use python if available.
+let g:Tex_UsePython = 1
+" the system command which pulls in a file.
+if &shell =~ 'sh'
+	let g:Tex_CatCmd = 'cat'
+else
+	let g:Tex_CatCmd = 'type'
+endif
+
+if !has('python') || !g:Tex_UsePython
+	" Tex_GotoTempFile: open a temp file. reuse from next time on {{{
+	" Description: 
+	function! Tex_GotoTempFile()
+		if !exists('s:tempFileName')
+			let s:tempFileName = tempname()
+		endif
+		exec 'silent! split '.s:tempFileName
+	endfunction " }}}
+	" Tex_IsPresentInFile: finds if a string str, is present in filename {{{
+	" Description: 
+	function! Tex_IsPresentInFile(regexp, filename)
+		call Tex_GotoTempFile()
+
+		silent! 1,$ d _
+		let _report = &report
+		let _sc = &sc
+		set report=9999999 nosc
+		exec 'silent! 0r! '.g:Tex_CatCmd.' '.a:filename
+		set nomod
+		let &report = _report
+		let &sc = _sc
+
+		if search(a:regexp, 'w')
+			let retVal = 1
+		else
+			let retVal = 0
+		endif
+
+		silent! bd
+
+		return retVal
+	endfunction " }}}
+	" Tex_CatFile: returns the contents of the file in a string {{{
+	" Description: 
+	function! Tex_CatFile(filename)
+		call Tex_GotoTempFile()
+
+		silent! 1,$ d _
+
+		let _report = &report
+		let _sc = &sc
+		set report=9999999 nosc
+		exec 'silent! 0r! '.g:Tex_CatCmd.' '.a:filename
+
+
+		set nomod
+		let _a = @a
+		silent! normal! ggVG"ay
+		let retVal = @a
+		let @a = _a
+
+		silent! bd
+		let &report = _report
+		let &sc = _sc
+		return retVal
+	endfunction " }}}
+	" Tex_CompileMultipleTimes_Vim: vim implementaion of compileLatex() {{{
+	" Description: compiles a file multiple times to get cross-references right.
+	function! Tex_CompileMultipleTimes_Vim()
+		let mainFileName_root = Tex_GetMainFileName(':p:t:r:r')
+
+		if mainFileName_root == ''
+			let mainFileName_root = expand("%:p:t:r")
+		endif
+
+		" first run latex once.
+		silent! call Tex_CompileLatex()
+
+		if Tex_IsPresentInFile('\\bibdata', mainFileName_root.'.aux')
+			let bibFileName = mainFileName_root . '.bbl'
+
+			let biblinesBefore = Tex_CatFile(bibFileName)
+
+			echomsg "running bibtex..."
+			let temp_mp = &mp | let &mp='bibtex'
+			exec 'silent! make '.mainFileName_root
+			let &mp = temp_mp
+
+			let biblinesAfter = Tex_CatFile(bibFileName)
+
+			if biblinesAfter != biblinesBefore
+				echomsg 'running latex a second time because bibliography file changed...'
+				silent! call Tex_CompileLatex()
+			endif
+
+		endif
+
+		" check if latex asks us to rerun
+		if Tex_IsPresentInFile('Rerun to get cross-references right', mainFileName_root.'.log')
+			echomsg "running latex a third time to get cross-references right..."
+			silent! call Tex_CompileLatex()
+		endif
+
+		" finally set up the error window and the preview of the log
+		silent! call Tex_SetupErrorWindow()
+	endfunction " }}}
+
+	finish
+endif
+
 python <<EOF
 import vim
 import re, os, string
@@ -48,7 +177,7 @@ def compileLatex():
 		mainFileName_root = vim.eval('expand("%:p:r")')
 	
 	# first run latex once.
-	vim.command('silent! call RunLaTeX()')
+	vim.command('silent! call Tex_CompileLatex()')
 
 	if isPresentInFile(r'\\bibdata', mainFileName_root + '.aux'):
 		bibFileName = mainFileName_root + '.bbl'
@@ -60,145 +189,22 @@ def compileLatex():
 		vim.command('silent! make %s' % mainFileName_root)
 		vim.command('let &mp = temp_mp')
 
-		try:
-			biblinesAfter = catFile(bibFileName)
+		biblinesAfter = catFile(bibFileName)
 
-			# if the .bbl file changed with this bibtex command, then we need
-			# to rerun latex to refresh the bibliography
-			if biblinesAfter != biblinesBefore:
-				vim.command("echomsg 'running latex a second time because bibliography file changed...'")
-			vim.command('silent! call RunLaTeX()')
-		except IOError:
-			vim.command('echomsg "unable to read [%s], quitting to next stage..."' % bibFileName)
+		# if the .bbl file changed with this bibtex command, then we need
+		# to rerun latex to refresh the bibliography
+		if biblinesAfter != biblinesBefore:
+			vim.command("echomsg 'running latex a second time because bibliography file changed...'")
+		vim.command('silent! call Tex_CompileLatex()')
 
 	# check if latex asks us to rerun
 	if isPresentInFile('Rerun to get cross-references right', mainFileName_root + '.log'):
 		vim.command('echomsg "running latex a third time to get cross-references right..."')
-		vim.command('silent! call RunLaTeX()')
+		vim.command('silent! call Tex_CompileLatex()')
 
+	# finally set up the error window and the preview of the log
+	vim.command('silent! call Tex_SetupErrorWindow()')
 # }}}
 EOF
-
-" generate a map for compiling multiple times.
-nnoremap <buffer> <Plug>Tex_CompileMultipleTimes  :call Tex_CompileMultipleTimes()<CR>
-
-if !hasmapto('<Plug>Tex_CompileMultipleTimes')
-	nmap <leader>lm <Plug>Tex_CompileMultipleTimes
-endif
-
-" TODO: these will need to go into texrc finally.
-" use python if available.
-let g:Tex_UsePython = 1
-" the system command which pulls in a file.
-if &shell =~ 'sh'
-	let g:Tex_CatCmd = 'cat'
-else
-	let g:Tex_CatCmd = 'type'
-endif
-
-" Tex_CompileMultipleTimes: compile a latex file multiple times {{{
-" Description: compile a latex file multiple times to get cross-references asd
-"              right.
-function! Tex_CompileMultipleTimes()
-	if has('python') && g:Tex_UsePython
-		python compileLatex()
-	else
-		call Tex_CompileMultipleTimes_Vim()
-	endif
-endfunction " }}}
-
-" Tex_GotoTempFile: open a temp file. reuse from next time on {{{
-" Description: 
-function! Tex_GotoTempFile()
-	if !exists('s:tempFileName')
-		let s:tempFileName = tempname()
-	endif
-	exec 'silent! split '.s:tempFileName
-endfunction " }}}
-" Tex_IsPresentInFile: finds if a string str, is present in filename {{{
-" Description: 
-function! Tex_IsPresentInFile(regexp, filename)
-	call Tex_GotoTempFile()
-
-	silent! 1,$ d _
-	let _report = &report
-	let _sc = &sc
-	set report=9999999 nosc
-	exec 'silent! 0r! '.g:Tex_CatCmd.' '.a:filename
-	set nomod
-	let &report = _report
-	let &sc = _sc
-
-	if search(a:regexp, 'w')
-		let retVal = 1
-	else
-		let retVal = 0
-	endif
-
-	silent! bd
-
-	return retVal
-endfunction " }}}
-" Tex_CatFile: returns the contents of the file in a string {{{
-" Description: 
-function! Tex_CatFile(filename)
-	call Tex_GotoTempFile()
-
-	silent! 1,$ d _
-
-	let _report = &report
-	let _sc = &sc
-	set report=9999999 nosc
-	exec 'silent! 0r! '.g:Tex_CatCmd.' '.a:filename
-
-
-	set nomod
-	let _a = @a
-	silent! normal! ggVG"ay
-	let retVal = @a
-	let @a = _a
-
-	silent! bd
-	let &report = _report
-	let &sc = _sc
-	return retVal
-endfunction " }}}
-" Tex_CompileMultipleTimes_Vim: vim implementaion of compileLatex() {{{
-" Description: compiles a file multiple times to get cross-references right.
-function! Tex_CompileMultipleTimes_Vim()
-	let mainFileName_root = Tex_GetMainFileName(':p:r:r')
-
-	if mainFileName_root == ''
-		let mainFileName_root = expand("%:p:r")
-	endif
-	
-	" first run latex once.
-	silent! call RunLaTeX()
-
-	if Tex_IsPresentInFile('\\bibdata', mainFileName_root.'.aux')
-		let bibFileName = mainFileName_root . '.bbl'
-
-		let biblinesBefore = Tex_CatFile(bibFileName)
-
-		echomsg "running bibtex..."
-		let temp_mp = &mp | let &mp='bibtex'
-		exec 'silent! make '.mainFileName_root
-		let &mp = temp_mp
-
-		let biblinesAfter = Tex_CatFile(bibFileName)
-
-		if biblinesAfter != biblinesBefore
-			echomsg 'running latex a second time because bibliography file changed...'
-			silent! call RunLaTeX()
-		endif
-
-	endif
-
-	" check if latex asks us to rerun
-	if Tex_IsPresentInFile('Rerun to get cross-references right', mainFileName_root.'.log')
-		echomsg "running latex a third time to get cross-references right..."
-		silent! call RunLaTeX()
-	endif
-endfunction " }}}
 
 " vim:fdm=marker:nowrap:noet:ff=unix:ts=4:sw=4
