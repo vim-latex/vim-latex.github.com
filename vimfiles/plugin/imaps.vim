@@ -1,10 +1,13 @@
 "        File: imaps.vim
-"      Author: Srinath Avadhanula
-"              ( srinath@fastmail.fm )
-"         WWW: http://robotics.eecs.berkeley.edu/~srinath/vim/.vim/imaps.vim
+"     Authors: Srinath Avadhanula <srinath AT fastmail.fm>
+"              Benji Fisher <benji AT member.AMS.org>
+"              
+"         WWW: http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/vim-latex/vimfiles/plugin/imaps.vim?only_with_tag=MAIN
+"
 " Description: insert mode template expander with cursor placement
 "              while preserving filetype indentation.
-" Last Change: Fri Dec 13 12:00 PM 2002 EST
+"
+" Last Change: Fri Dec 13 10:00 PM 2002 PST
 " 
 " Documentation: {{{
 "
@@ -97,6 +100,20 @@ endif
 let s:doneImaps = 1
 
 " ==============================================================================
+" Script variables
+" ==============================================================================
+" {{{
+" A lot of back-spaces, to be used by IMAP().  If needed, more will be added
+" automatically.
+let s:backsp = substitute("0123456789", '\d', "\<bs>", 'g')
+" s:LHS_{ft}_{char} will be generated automatically.  It will look like
+" s:LHS_tex_o = 'fo\|foo\|boo' and contain all mapped sequences ending in "o".
+" s:Map_{ft}_{lhs} will be generated automatically.  It will look like
+" s:Map_c_foo = 'for(<++>; <++>; <++>)', the mapping for "foo".
+"
+" }}}
+
+" ==============================================================================
 " functions for easy insert mode mappings.
 " ==============================================================================
 " IMAP: Adds a "fake" insert mode mapping. {{{
@@ -121,6 +138,45 @@ let s:doneImaps = 1
 "       the previous characters consititute the left hand side of the mapping,
 "       the previously typed characters and erased and the right hand side is
 "       inserted
+function! IMAP(ft, lhs, ...)
+	let lastLHSChar = a:lhs[strlen(a:lhs)-1]
+	" Make sure that s:backsp is long enough:
+	while strlen(s:backsp) < strlen(a:lhs)
+		let s:backsp = s:backsp . s:backsp
+	endwhile
+	" Add a:lhs to the list of left-hand sides that end with lastLHSChar:
+	if !exists("s:LHS_" . a:ft . "_" . s:Hash(lastLHSChar))
+		let s:LHS_{a:ft}_{s:Hash(lastLHSChar)} = escape(a:lhs, '\')
+	else
+		let s:LHS_{a:ft}_{s:Hash(lastLHSChar)} = escape(a:lhs, "\\") . '\|' .
+					\ s:LHS_{a:ft}_{s:Hash(lastLHSChar)}
+	endif
+	" Build up the right-hand side:
+	let rhs = ""
+	let phs = s:PlaceHolderStart()
+	let phe = s:PlaceHolderEnd()
+	let i = 1   " counter for arguments
+	let template = 0    " flag:  is the current argument a <+template+> ?
+	while i <= a:0
+		if template
+			let rhs = rhs . phs . a:{i} . phe
+		else
+			let rhs = rhs . a:{i}
+		endif
+		let i = i+1
+		let template = !template
+	endwhile
+	let s:Map_{a:ft}_{s:Hash(a:lhs)} = rhs
+
+	" map only the last character of the left-hand side.
+	if lastLHSChar == ' '
+		let lastLHSChar = '<space>'
+	end
+	exe 'inoremap <silent>' escape(lastLHSChar, '|')
+				\ '<C-r>=<SID>NewLookupCharacter("' . escape(lastLHSChar, '\|') .
+				\ '")<CR>'
+endfunction
+" Old version:
 function! Tex_IMAP(lhs, rhs, ft)
 	let lastLHSChar = a:lhs[strlen(a:lhs)-1]
 	" s:charLens_<ft>_<char> contains the lengths of the left hand sides of
@@ -191,6 +247,32 @@ endfunction
 " loops over all the possible left-hand side variables ending in this
 " character and then if a possible match exists, erases the left-hand side
 " and inserts the right-hand side instead.
+function! s:NewLookupCharacter(char)
+	let charHash = s:Hash(a:char)
+
+	if exists("s:LHS_" . &ft . "_" . charHash)
+		let ft = &ft
+	elseif exists("s:LHS__" . charHash)
+		let ft = ""
+	else
+		return a:char
+	endif
+	" Find the longest left-hand side that matches the line so far.
+	" Use '\V' (very no-magic) so that only '\' is special, and it was already
+	" escaped when building up s:LHS_{ft}_{charHash} .
+	let text = strpart(getline("."), 0, col(".")-1) . a:char
+	let lhs = matchstr(text, '\V\(' . s:LHS_{ft}_{charHash} . '\)\$')
+	if strlen(lhs) == 0
+		return a:char
+	endif
+	" enough back-spaces to erase the left-hand side; -1 for the last
+	" character typed:
+	let bs = substitute(strpart(lhs, 1), ".", "\<bs>", "g")
+	" Execute this string to get to the start of the replacement text:
+	let mark = line(".") . "norm!" . (virtcol(".") - strlen(lhs) + 1) . "|"
+	return bs . IMAP_PutTextWithMovement(s:Map_{ft}_{s:Hash(lhs)}, mark)
+endfunction
+" Old version:
 function! <SID>LookupCharacter(char)
 	let charHash = char2nr(a:char)
 
@@ -268,6 +350,54 @@ endfunction
 " }}}
 " IMAP_PutTextWithMovement: appends movement commands to a text  {{{
 " 		This enables which cursor placement.
+function! IMAP_PutTextWithMovement(text, mark)
+
+	let text = a:text
+	let phs = s:PlaceHolderStart()
+	let phe = s:PlaceHolderEnd()
+	let startpat = escape(phs, '\')
+	let endpat = escape(phe, '\')
+
+	" If the user does not want to use place-holders, then remove them.
+	if exists('g:Imap_UsePlaceHolders') && !g:Imap_UsePlaceHolders
+		" a heavy-handed way to just use the first placeholder and remove the
+		" rest.  Replace the first template with phe ...
+		let text = substitute(text, '\V'.startpat.'\.\{-}'.endpat, endpat, '')
+		" ... delete all the others ...
+		let text = substitute(text, '\V'.startpat.'\.\{-}'.endpat, '', '')
+		" ... and replace phe with phs.phe .
+		let text = substitute(text, '\V'.endpat, startpat.endpat, '')
+	endif
+
+	" template = first <+{...}+> in text, where {...} may be empty.
+	let template = matchstr(text, '\V' . startpat . '\.\{-}' . endpat)
+	" If there are no place holders, just return the text.
+	if strlen(template) == 0
+		return text
+	endif
+
+	" Now, start building the return value.
+	" Return to Normal mode:  this works even if 'insertmode' is set:
+	let text = text . "\<C-\>\<C-N>"
+	" Start at the position given by mark:
+	let text = text . ":" . a:mark . "\<CR>"
+	" Look for the first place holder:
+	let text = text . ":call search('\\V" . startpat . "', 'W')\<CR>"
+	" Finally, append commands to Select <+template+> or replace <++> .
+	" Enter Visual mode and move to the end.  Note that <space> can cross line
+	" boundaries if 'ww' has its default value.
+	let text = text . "v" . (strlen(template)-1) . "\<space>"
+	if template == phs . phe
+		" template looks like <++> so Change it:
+		let text = text . "c"
+	else
+		" Enter Select mode.
+		let text = text . "\<C-G>"
+	endif
+
+	return text
+endfunction
+" Old version:
 function! Tex_PutTextWithMovement(text)
 	
 	let s:oldenc = &encoding
@@ -565,6 +695,32 @@ endfun
 let s:RemoveLastHistoryItem = ':call histdel("/", -1)|let @/=histget("/", -1)'
 
 " }}}
+" Hash: Return a version of a string that can be used as part of a variable" {{{
+" name.
+fun! s:Hash(text)
+	return substitute(a:text, '\([^[:alnum:]]\)',
+				\ '\="_".char2nr(submatch(1))."_"', 'g')
+endfun
+"" }}}
+" PlaceHolderStart and PlaceHolderEnd:  return the buffer-local " {{{
+" variable, or the global one, or the default.
+fun! s:PlaceHolderStart()
+	if exists("b:Imap_PlaceHolderStart")
+		return b:Imap_PlaceHolderStart
+	elseif exists("g:Imap_PlaceHolderStart")
+		return g:Imap_PlaceHolderStart
+	else
+		return "<+"
+endfun
+fun! s:PlaceHolderEnd()
+	if exists("b:Imap_PlaceHolderEnd")
+		return b:Imap_PlaceHolderEnd
+	elseif exists("g:Imap_PlaceHolderEnd")
+		return g:Imap_PlaceHolderEnd
+	else
+		return "+>"
+endfun
+" }}}
 
 " ============================================================================== 
 " A bonus function: Snip()
@@ -601,4 +757,4 @@ endfunction
 com! -nargs=0 -range Snip :<line1>,<line2>call <SID>Snip()
 " }}}
 
-" vim6:fdm=marker:nowrap
+" vim:ft=vim:ts=4:sw=4:noet:fdm=marker:commentstring=\"\ %s:nowrap
