@@ -69,7 +69,7 @@ ltt:
 #   from my computer to sf.net. The rest is done locally on the sf.net
 #   server.
 release:
-	$(SSHCMD) $(CVSUSER)@vim-latex.sf.net /home/groups/v/vi/vim-latex/bin/upload
+	$(SSHCMD) $(CVSUSER)@vim-latex.sf.net /home/groups/v/vi/vim-latex/bin/upload1.5
 
 updoc:
 	$(SSHCMD) $(CVSUSER)@vim-latex.sf.net /home/groups/v/vi/vim-latex/bin/updoc
