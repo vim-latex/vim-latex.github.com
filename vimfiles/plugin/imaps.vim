@@ -7,7 +7,7 @@
 " Description: insert mode template expander with cursor placement
 "              while preserving filetype indentation.
 "
-" Last Change: Sat Dec 14 09:00 AM 2002 EST
+" Last Change: Wed Dec 18 11:00 AM 2002 EST
 " 
 " Documentation: {{{
 "
@@ -129,117 +129,60 @@
 "       the previous characters consititute the left hand side of the mapping,
 "       the previously typed characters and erased and the right hand side is
 "       inserted
-function! IMAP(ft, lhs, ...)
-	let lastLHSChar = a:lhs[strlen(a:lhs)-1]
-	" Add a:lhs to the list of left-hand sides that end with lastLHSChar:
-	if !exists("s:LHS_" . a:ft . "_" . s:Hash(lastLHSChar))
-		let s:LHS_{a:ft}_{s:Hash(lastLHSChar)} = escape(a:lhs, '\')
+
+" IMAP: set up a filetype specific mapping.
+" Description:
+"   "maps" the lhs to rhs in files of type 'ft'. If supplied with 2
+"   additional arguments, then those are assumed to be the placeholder
+"   characters in rhs. If unspecified, then the placeholder characters
+"   are assumed to be '<+' and '+>' These placeholder characters in
+"   a:rhs are replaced with the users setting of
+"   [bg]:Imap_PlaceHolderStart and [bg]:Imap_PlaceHolderEnd settings.
+"
+function! IMAP(lhs, rhs, ft, ...)
+
+	" Find the place holders to save for IMAP_PutTextWithMovement() .
+	if a:0 < 2
+		let phs = '<+'
+		let phe = '+>'
 	else
-		let s:LHS_{a:ft}_{s:Hash(lastLHSChar)} = escape(a:lhs, "\\") . '\|' .
-					\ s:LHS_{a:ft}_{s:Hash(lastLHSChar)}
+		let phs = a:1
+		let phe = a:2
 	endif
 
-	" Build up the right-hand side:
-	let rhs = ""
-	let phs = s:PlaceHolderStart()  " default <+
-	let phe = s:PlaceHolderEnd()    " default +>
-	let i = 1                       " counter for arguments
-	let template = 0    " flag:  is the current argument a <+template+> ?
-	while i <= a:0
-		if template
-			let rhs = rhs . phs . a:{i} . phe
-		else
-			let rhs = rhs . a:{i}
-		endif
-		let i = i+1
-		let template = !template
-	endwhile
-	let s:Map_{a:ft}_{s:Hash(a:lhs)} = rhs
+	let hash = s:Hash(a:lhs)
+	let s:Map_{a:ft}_{hash} = a:rhs
+	let s:phs_{a:ft}_{hash} = phs
+	let s:phe_{a:ft}_{hash} = phe
+
+	" Add a:lhs to the list of left-hand sides that end with lastLHSChar:
+	let lastLHSChar = a:lhs[strlen(a:lhs)-1]
+	let hash = s:Hash(lastLHSChar)
+	if !exists("s:LHS_" . a:ft . "_" . hash)
+		let s:LHS_{a:ft}_{hash} = escape(a:lhs, '\')
+	else
+		let s:LHS_{a:ft}_{hash} = escape(a:lhs, '\') .'\|'.  s:LHS_{a:ft}_{hash}
+	endif
 
 	" map only the last character of the left-hand side.
 	if lastLHSChar == ' '
 		let lastLHSChar = '<space>'
 	end
-	exe 'inoremap <silent>' escape(lastLHSChar, '|')
-				\ '<C-r>=<SID>NewLookupCharacter("' . escape(lastLHSChar, '\|') .
+	exe 'inoremap <silent>' (a:ft== '' ? '' : '<buffer>')
+				\ escape(lastLHSChar, '|')
+				\ '<C-r>=<SID>LookupCharacter("' .
+				\ escape(lastLHSChar, '\|') .
 				\ '")<CR>'
-endfunction
-
-" }}}
-" Tex_IMAP: This is the old version of IMAP which used to take 3 arguments. {{{
-"           It has been changed in order to retain backwards compatibility (of
-"           sorts) while still using the new IMAP
-" It could also be used for convenience in places where specifying multiple
-" arguments might be tedious.
-"
-" Ex:
-"
-" call Tex_IMAP('foo', 'ba<++>bar', '', '<+', '+>')
-"
-" The last 2 optional arguments specify the placeholder characters in the rhs.
-" See s:PlaceHolderStart() and s:PlaceHolderEnd() for how they are chosen if
-" the the optional arguments are unspecified.
-function! Tex_IMAP(lhs, rhs, ft, ...)
-
-	if a:0 > 0
-		let phs = a:1
-		let phe = a:2
-	else
-		" Tex_IMAP is only concerned with mappings which latex-suite itself
-		" generates. This means that we do not use the g:Imap_PlaceHolder*
-		" settings.
-		let phs = '<+'
-		let phe = '+>'
-	endif
-	let startpat = escape(phs, '\')
-	let endpat = escape(phe, '\')
-
-	" This might not work in all cases, but it is a good idea.
-	" Problem:  \ or " or ' in a:rhs ...
-	" " Change 'ba<++>bar' into '"ba", "", "bar"'
-	" let args = '"' . escape(a:rhs, '\"') . '"'
-	" let args = substitute(args, '\V' . startpat . '\|' . endpat, '","', "g")
-	" let callString = 'call IMAP(a:ft, a:lhs,' . args . ')'
-
-	" break up the rhs into multiple chunks 
-	let remainingString = a:rhs
-	let callString = 'call IMAP(a:ft, a:lhs'
-	" Use \V so that we do not have to worry about magic characters.
-	let pat = '\V' . '\(\.\{-}\)' .startpat. '\(\.\{-}\)' .endpat. '\(\.\*\)'
-
-	let i = 1
-	while remainingString =~ pat
-		let arg_{i} = substitute(remainingString, pat, '\1', '')
-		let callString = callString.', arg_'.i
-		let arg_{i+1} = substitute(remainingString, pat, '\2', '')
-		let callString = callString.', arg_'.(i+1)
-		let remainingString = substitute(remainingString, pat, '\3', '')
-		let i = i+2
-		if i >= 20
-			echomsg 'getting more than 20 placeholders!'
-			echomsg 'input rhs = '.a:rhs
-		endif
-	endwhile
-	if strlen(remainingString)
-		let arg_{i} = remainingString
-		let callString = callString.', arg_'.i
-	endif
-
-	" Finally, we end up with a string like:
-	" 'call IMAP(a:ft, a:lhs, arg_1, arg_2, arg_3)'
-	let callString = callString.')'
-
-	exec callString
 endfunction
 
 " }}}
 " LookupCharacter: inserts mapping corresponding to this character {{{
 "
-" This function performs a reverse lookup when this character is typed in. It
-" loops over all the possible left-hand side variables ending in this
-" character and then if a possible match exists, erases the left-hand side
-" and inserts the right-hand side instead.
-function! s:NewLookupCharacter(char)
+" This function extracts from s:LHS_{&ft}_{a:char} or s:LHS__{a:char}
+" the longest lhs matching the current text.  Then it replaces lhs with the
+" corresponding rhs saved in s:Map_{ft}_{lhs} .
+" The place-holder variables are passed to IMAP_PutTextWithMovement() .
+function! s:LookupCharacter(char)
 	let charHash = s:Hash(a:char)
 
 	if exists("s:LHS_" . &ft . "_" . charHash)
@@ -253,8 +196,8 @@ function! s:NewLookupCharacter(char)
 	" Use '\V' (very no-magic) so that only '\' is special, and it was already
 	" escaped when building up s:LHS_{ft}_{charHash} .
 	let text = strpart(getline("."), 0, col(".")-1) . a:char
-	" matchstr() returns the longest match. This automatically ensures that
-	" the longest LHS is used for the mapping.
+	" matchstr() returns the match that starts first. This automatically
+	" ensures that the longest LHS is used for the mapping.
 	let lhs = matchstr(text, '\V\(' . s:LHS_{ft}_{charHash} . '\)\$')
 	if strlen(lhs) == 0
 		return a:char
@@ -262,97 +205,39 @@ function! s:NewLookupCharacter(char)
 	" enough back-spaces to erase the left-hand side; -1 for the last
 	" character typed:
 	let bs = substitute(strpart(lhs, 1), ".", "\<bs>", "g")
-	" Execute this string to get to the start of the replacement text:
-	let mark = line(".") . "norm!" . (virtcol(".") - strlen(lhs) + 1) . "|"
-	return bs . IMAP_PutTextWithMovement(s:Map_{ft}_{s:Hash(lhs)}, mark)
-endfunction
-
-" Old version:
-function! <SID>LookupCharacter(char)
-	let charHash = char2nr(a:char)
-
-	if !exists('s:charLens_'.&ft.'_'.charHash)
-		\ && !exists('s:charLens__'.charHash)
-		return a:char
-	end
-
-	let k = 1
-	while k <= 2
-		" first check the filetype specific mappings and then the general
-		" purpose mappings.
-		if k == 1
-			let ft = &ft
-		else
-			let ft = ''
-		end
-
-		" get the lengths of the left-hand side mappings which end in this
-		" character. if no mappings ended in this character, then continue... 
-		if !exists('s:charLens_'.ft.'_'.charHash)
-			let k = k + 1
-			continue
-		end
-
-		exe 'let lens = s:charLens_'.ft.'_'.charHash
-
-		let i = 1
-		while 1
-			" get the i^th length. 
-			let numchars = s:Strntok(lens, ',', i)
-			" if there are no more lengths, then skip to the next outer while
-			" loop.
-			if numchars == ''
-				break
-			end
-
-			if col('.') < numchars
-				let i = i + 1
-				continue
-			end
-			
-			" get the corresponding text from before the text. append the present
-			" char to complete the (possible) LHS
-			let text = strpart(getline('.'), col('.') - numchars, numchars - 1).a:char
-			let lhsHash = 's:Map_'.ft.'_'.substitute(text, '\(\W\)', '\="_".char2nr(submatch(1))."_"', 'g')
-
-			" if there is no mapping of this length which satisfies the previously
-			" typed in characters, then proceed to the next length group...
-			if !exists(lhsHash)
-				let i = i + 1
-				continue
-			end
-
-			"  ... otherwise insert the corresponding RHS
-			" first generate the required number of back-spaces to erase the
-			" previously typed in characters.
-			exe "let tokLHS = s:LenStr_".numchars
-			let bkspc = substitute(tokLHS, '.$', '', '')
-			let bkspc = substitute(bkspc, '.', "\<bs>", "g")
-
-			" get the corresponding RHS
-			exe "let ret = ".lhsHash
-			
-			return bkspc.Tex_PutTextWithMovement(ret)
-
-		endwhile
-
-		let k = k + 1
-	endwhile
-	
-	return a:char
+	let hash = s:Hash(lhs)
+	return bs . IMAP_PutTextWithMovement(s:Map_{ft}_{hash},
+				\ s:phs_{ft}_{hash}, s:phe_{ft}_{hash})
 endfunction
 
 " }}}
-" IMAP_PutTextWithMovement: appends movement commands to a text  {{{
-" 		This enables which cursor placement.
-function! IMAP_PutTextWithMovement(text, mark)
+" IMAP_PutTextWithMovement: returns the string with movement appended {{{
+" Description:
+"   If a:str contains "placeholders", then appends movement commands to
+"   str in a way that the user moves to the first placeholder and enters
+"   insert or select mode. If supplied with 2 additional arguments, then
+"   they are assumed to be the placeholder specs. Otherwise, they are
+"   assumed to be '<+' and '+>'. These placeholder chars are replaced
+"   with the users settings of [bg]:Imap_PlaceHolderStart and
+"   [bg]:Imap_PlaceHolderEnd.
+function! IMAP_PutTextWithMovement(str, ...)
 
-	let text = a:text
-	let phs = s:PlaceHolderStart()
-	let phe = s:PlaceHolderEnd()
+	" Find the place holders for the input.
+	if a:0 < 2
+		let phs = '<+'
+		let phe = '+>'
+	else
+		let phs = a:1
+		let phe = a:2
+	endif
 	let startpat = escape(phs, '\')
 	let endpat = escape(phe, '\')
+	" A very rare string:
+	let marker = phs . phs . phe . phe
+	" TODO:  Maybe I need to play some games with iconv() to define marker and
+	" markerpat in case marker !~ marker ...
 
+	let text = a:str
 	" If the user does not want to use place-holders, then remove them.
 	if exists('g:Imap_UsePlaceHolders') && !g:Imap_UsePlaceHolders
 		" a heavy-handed way to just use the first placeholder and remove the
@@ -364,32 +249,43 @@ function! IMAP_PutTextWithMovement(text, mark)
 		let text = substitute(text, '\V'.endpat, startpat.endpat, '')
 	endif
 
-	" template = first <+{...}+> in text, where {...} may be empty.
-	let template = matchstr(text, '\V' . startpat . '\.\{-}' . endpat)
+	let pattern = '\V\(\.\{-}\)' .startpat. '\(\.\{-}\)' .endpat. '\(\.\*\)'
 	" If there are no place holders, just return the text.
-	if strlen(template) == 0
-		echomsg 'searching for \V' . startpat . '\.\{-}' . endpat . ' in ' . text
+	if text !~ pattern
 		return text
 	endif
+	" Break text up into "initial <+template+> final"; any piece may be empty.
+	let initial  = substitute(text, pattern, '\1', '')
+	let template = substitute(text, pattern, '\2', '')
+	let final    = substitute(text, pattern, '\3', '')
+
+	" Now, get the place holders for the output.
+	let phs = s:PlaceHolderStart()    " default <+
+	let phe = s:PlaceHolderEnd()      " default +>
+	let template = phs . template . phe
+	let final = substitute(final, startpat, escape(phs, '\'), 'g')
+	let final = substitute(final, endpat,   escape(phe, '\'), 'g')
 
 	" Now, start building the return value.
+	let text = initial . marker . template . marker . final
 	" Return to Normal mode:  this works even if 'insertmode' is set:
 	let text = text . "\<C-\>\<C-N>"
-	" Start at the position given by mark:
-	let text = text . ":" . a:mark . "\<CR>"
-	" Look for the first place holder:
-	let text = text . ":call search('\\V" . startpat . "', 'W')\<CR>"
+	" Move to the first marker and delete it.  Cursor ends on beginning of
+	" template.
+	let text = text . "2?" . marker . "\<CR>" . "v/" . marker . "/e\<CR>x"
+	" Enter Visual mode and move to just before the next marker.
+	let text = text . "v/" . marker . "/s-1\<CR>\<C-\>\<C-N>"
+	" Move to the second marker and delete it.
+	let text = text . "/" . marker . "\<CR>" . "d/" . marker . "/e\<CR>"
+	" Note:  We use a search strategy instead of computing the length of the
+	" template because strlen() returns different things depending on the
+	" encoding.
+	" Clean up the search history.  Restore Visual selection.
+	let text = text . ":" . s:RemoveLastHistoryItem . "\<CR>gv"
 	" Finally, append commands to Select <+template+> or replace <++> .
-	" Enter Visual mode and move to the end. Use a search strategy instead of
-	" computing the length of the template because strlen() returns different
-	" things depending on the encoding.
-	let text = text . "v/\\V" . endpat . "/e\<CR>\<ESC>"
-				\ . s:RemoveLastHistoryItem . "\<CR>gv"
-	if template == phs . phe
-		" template looks like <++> so Change it:
+	if template == phs . phe    " template looks like <++> so Change it:
 		let text = text . "c"
-	else
-		" Enter Select mode.
+	else                        " Enter Select mode.
 		let text = text . "\<C-G>"
 	endif
 
