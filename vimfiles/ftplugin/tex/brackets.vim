@@ -1,7 +1,7 @@
 " ==============================================================================
 " Author: Carl Mueller
 " 		  (incorporated into latex-suite by Srinath Avadhanula)
-" Last Change: Sat Dec 14 01:00 AM 2002 PST
+" Last Change: Thu Dec 19 03:00 AM 2002 PST
 " Description:
 " 	This ftplugin provides the following maps:
 " . <M-b> encloses the previous character in \mathbf{}
@@ -92,7 +92,7 @@ function! Tex_MathCal()
 	if char =~ '[a-zA-Z0-9]'
 		return "\<BS>".'\mathcal{'.toupper(char).'}'
 	else
-		return Tex_PutTextWithMovement('\cite{<++>}<++>')
+		return IMAP_PutTextWithMovement('\cite{<++>}<++>')
 	endif
 endfunction
 " }}}
@@ -120,11 +120,11 @@ function! Tex_LeftRight()
 			let add = "\\"
 		endif
 		let rhs = matchstr(matchedbrackets, char.'\zs.\ze')
-		return "\<BS>".Tex_PutTextWithMovement('\left'.add.char.'<++>\right'.add.rhs.'<++>')
+		return "\<BS>".IMAP_PutTextWithMovement('\left'.add.char.'<++>\right'.add.rhs.'<++>')
 	elseif char == '<'
-		return "\<BS>".Tex_PutTextWithMovement('langle<++>\rangle<++>')
+		return "\<BS>".IMAP_PutTextWithMovement('langle<++>\rangle<++>')
 	elseif char == 'q'
-		return "\<BS>".Tex_PutTextWithMovement('\lefteqn{<++>}<++>')
+		return "\<BS>".IMAP_PutTextWithMovement('\lefteqn{<++>}<++>')
 	else
 		return '\label{<++>}<++>'
 	endif

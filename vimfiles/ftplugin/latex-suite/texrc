@@ -3,7 +3,7 @@
 " 	     File: texrc.vim
 "      Author: Srinath Avadhanula
 "     Created: Mon Apr 01 11:00 AM 2002 PST
-" Last Change: Sat Dec 14 02:00 AM 2002 PST
+" Last Change: Thu Dec 19 04:00 AM 2002 PST
 "
 "  Description: This file contains resource configuration information for the
 "               latex-suite package.
@@ -180,12 +180,24 @@ TexLet g:Tex_Flavor = 'latex'
 " these options are actually used by imaps.vim, therefore the prefix is Imap_
 " and not Tex_. See |placeholders| for a description of how to use
 " place-holders. You can either completely disable placeholders (not
-" recommended) and/or you can change the place holder characters. The Start
-" and End characters should only be single characters. i.e, '' or ,, etc are
-" not allowed.
+" recommended) and/or you can change the place holder characters.
+
 TexLet g:Imap_UsePlaceHolders = 1 
 TexLet g:Imap_PlaceHolderStart = '<+'
 TexLet g:Imap_PlaceHolderEnd = '+>'
+
+" This option when set to 1 makes <C-J> in insert mode delete
+" non-descriptive (empty) placeholders and enters insert mode.
+" NOTE: This option _has_ to be set in the .vimrc. Setting this in a filetype
+"       plugin file such as ftplugin/tex.vim will not have any affect.
+TexLet g:Imap_DeleteEmptyPlaceHolders = 0
+
+" When set to 1, in visual mode, <C-J> takes you to the next placeholder
+" without deleting the current placeholder.
+" NOTE: This option _has_ to be set in the .vimrc. Setting this in a filetype
+"       plugin file such as ftplugin/tex.vim will not have any affect.
+TexLet g:Imap_StickyPlaceHolders = 1
+
 
 " }}}
 " Menu Wizard Option: {{{
