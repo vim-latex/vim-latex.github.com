@@ -4,7 +4,7 @@
 "              (minor modifications by Srinath Avadhanula)
 " 	  Version: 1.0 
 "     Created: Tue Apr 23 05:00 PM 2002 PST
-" Last Change: Thu Dec 19 03:00 AM 2002 PST
+" Last Change: Sun Dec 22 03:00 PM 2002 PST
 " 
 "  Description: functions for handling templates in latex-suite/templates
 "               directory.
@@ -29,7 +29,7 @@ function! <SID>SetTemplateMenu()
 		exe "amenu ".g:Tex_TemplatesMenuLocation."&".i.":<Tab>".fnameshort." ".
 			\":call <SID>ReadTemplate('".fnameshort."')<CR>".
 			\":call <SID>ProcessTemplate()<CR>:0<CR>".
-			\"i<C-r>=IMAP_Jumpfunc()<CR>"
+			\"i<C-r>=IMAP_Jumpfunc('', 1)<CR>"
 		let i = i + 1
 	endwhile
 endfunction 
@@ -86,7 +86,7 @@ endfunction
 com! -nargs=? TTemplate :call <SID>ReadTemplate(<f-args>)
 					   \| :call <SID>ProcessTemplate()
 					   \| :0
-					   \| :exec "normal! i\<C-r>=IMAP_Jumpfunc()\<CR>"
+					   \| :exec "normal! i\<C-r>=IMAP_Jumpfunc('', 1)\<CR>"
 					   \| :startinsert
 
 " vim:fdm=marker:ts=4:sw=4:noet
