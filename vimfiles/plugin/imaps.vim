@@ -7,7 +7,7 @@
 " Description: insert mode template expander with cursor placement
 "              while preserving filetype indentation.
 "
-" Last Change: Sat Dec 14 02:00 AM 2002 PST
+" Last Change: Sat Dec 14 09:00 AM 2002 EST
 " 
 " Documentation: {{{
 "
@@ -97,9 +97,6 @@
 " Script variables
 " ==============================================================================
 " {{{
-" A lot of back-spaces, to be used by IMAP().  If needed, more will be added
-" automatically.
-let s:backsp = substitute("0123456789", '\d', "\<bs>", 'g')
 " s:LHS_{ft}_{char} will be generated automatically.  It will look like
 " s:LHS_tex_o = 'fo\|foo\|boo' and contain all mapped sequences ending in "o".
 " s:Map_{ft}_{lhs} will be generated automatically.  It will look like
@@ -134,10 +131,6 @@ let s:backsp = substitute("0123456789", '\d', "\<bs>", 'g')
 "       inserted
 function! IMAP(ft, lhs, ...)
 	let lastLHSChar = a:lhs[strlen(a:lhs)-1]
-	" Make sure that s:backsp is long enough:
-	while strlen(s:backsp) < strlen(a:lhs)
-		let s:backsp = s:backsp . s:backsp
-	endwhile
 	" Add a:lhs to the list of left-hand sides that end with lastLHSChar:
 	if !exists("s:LHS_" . a:ft . "_" . s:Hash(lastLHSChar))
 		let s:LHS_{a:ft}_{s:Hash(lastLHSChar)} = escape(a:lhs, '\')
@@ -145,11 +138,12 @@ function! IMAP(ft, lhs, ...)
 		let s:LHS_{a:ft}_{s:Hash(lastLHSChar)} = escape(a:lhs, "\\") . '\|' .
 					\ s:LHS_{a:ft}_{s:Hash(lastLHSChar)}
 	endif
+
 	" Build up the right-hand side:
 	let rhs = ""
-	let phs = s:PlaceHolderStart()
-	let phe = s:PlaceHolderEnd()
-	let i = 1   " counter for arguments
+	let phs = s:PlaceHolderStart()  " default <+
+	let phe = s:PlaceHolderEnd()    " default +>
+	let i = 1                       " counter for arguments
 	let template = 0    " flag:  is the current argument a <+template+> ?
 	while i <= a:0
 		if template
@@ -175,7 +169,7 @@ endfunction
 " Tex_IMAP: This is the old version of IMAP which used to take 3 arguments. {{{
 "           It has been changed in order to retain backwards compatibility (of
 "           sorts) while still using the new IMAP
-" It could also be used for convinience in places where specifying multiple
+" It could also be used for convenience in places where specifying multiple
 " arguments might be tedious.
 "
 " Ex:
@@ -183,8 +177,8 @@ endfunction
 " call Tex_IMAP('foo', 'ba<++>bar', '', '<+', '+>')
 "
 " The last 2 optional arguments specify the placeholder characters in the rhs.
-" See s:PlaceHolderStart() and s:PlaceHolderEnd for how they are chosen if the
-" the optional arguments are unspecified.
+" See s:PlaceHolderStart() and s:PlaceHolderEnd() for how they are chosen if
+" the the optional arguments are unspecified.
 function! Tex_IMAP(lhs, rhs, ft, ...)
 
 	if a:0 > 0
@@ -197,52 +191,44 @@ function! Tex_IMAP(lhs, rhs, ft, ...)
 		let phs = '<+'
 		let phe = '+>'
 	endif
+	let startpat = escape(phs, '\')
+	let endpat = escape(phe, '\')
+
+	" This might not work in all cases, but it is a good idea.
+	" Problem:  \ or " or ' in a:rhs ...
+	" " Change 'ba<++>bar' into '"ba", "", "bar"'
+	" let args = '"' . escape(a:rhs, '\"') . '"'
+	" let args = substitute(args, '\V' . startpat . '\|' . endpat, '","', "g")
+	" let callString = 'call IMAP(a:ft, a:lhs,' . args . ')'
 
 	" break up the rhs into multiple chunks 
 	let remainingString = a:rhs
-	let callString = 'call IMAP(a:ft, a:lhs, arg_1'
+	let callString = 'call IMAP(a:ft, a:lhs'
+	" Use \V so that we do not have to worry about magic characters.
+	let pat = '\V' . '\(\.\{-}\)' .startpat. '\(\.\{-}\)' .endpat. '\(\.\*\)'
 
 	let i = 1
-	while remainingString != ''
-		let firstPart = matchstr(remainingString, '^.\{-}\ze\('.phs.'\|$\)')
-		let secondPart = matchstr(remainingString, 
-								 \ phs.'\zs.\{-}\ze'.phe,
-								 \ strlen(firstPart))
-		let arg_{i} = firstPart
-		" we have already appended one argument. Do this only from next time
-		" on.
-		if i > 1
-			let callString = callString.', arg_'.i
-		endif
-
-		" if firstPart is smaller than the total string, then there is a
-		" placeholder. Therefore append the placeholder as an argument
-		if strlen(firstPart) < strlen(remainingString)
-			let i = i + 1
-
-			let arg_{i} = secondPart
-			let callString = callString.', arg_'.i
-		endif
-
-		" find out the part remaining.
-		let remainingString = strpart(remainingString, 
-									  \ strlen(firstPart) +
-									  \ strlen(secondPart) +
-									  \ strlen(phs) + strlen(phe))
-
+	while remainingString =~ pat
+		let arg_{i} = substitute(remainingString, pat, '\1', '')
+		let callString = callString.', arg_'.i
+		let arg_{i+1} = substitute(remainingString, pat, '\2', '')
+		let callString = callString.', arg_'.(i+1)
+		let remainingString = substitute(remainingString, pat, '\3', '')
+		let i = i+2
 		if i >= 20
 			echomsg 'getting more than 20 placeholders!'
 			echomsg 'input rhs = '.a:rhs
 		endif
-
-		let i = i + 1
 	endwhile
+	if strlen(remainingString)
+		let arg_{i} = remainingString
+		let callString = callString.', arg_'.i
+	endif
 
 	" Finally, we end up with a string like:
 	" 'call IMAP(a:ft, a:lhs, arg_1, arg_2, arg_3)'
 	let callString = callString.')'
 
-	echomsg callString
 	exec callString
 endfunction
 
@@ -618,17 +604,17 @@ endfun
 " PlaceHolderStart and PlaceHolderEnd:  return the buffer-local " {{{
 " variable, or the global one, or the default.
 fun! s:PlaceHolderStart()
-	if exists("b:Imap_PlaceHolderStart")
+	if exists("b:Imap_PlaceHolderStart") && strlen(b:Imap_PlaceHolderEnd)
 		return b:Imap_PlaceHolderStart
-	elseif exists("g:Imap_PlaceHolderStart")
+	elseif exists("g:Imap_PlaceHolderStart") && strlen(g:Imap_PlaceHolderEnd)
 		return g:Imap_PlaceHolderStart
 	else
 		return "<+"
 endfun
 fun! s:PlaceHolderEnd()
-	if exists("b:Imap_PlaceHolderEnd")
+	if exists("b:Imap_PlaceHolderEnd") && strlen(b:Imap_PlaceHolderEnd)
 		return b:Imap_PlaceHolderEnd
-	elseif exists("g:Imap_PlaceHolderEnd")
+	elseif exists("g:Imap_PlaceHolderEnd") && strlen(g:Imap_PlaceHolderEnd)
 		return g:Imap_PlaceHolderEnd
 	else
 		return "+>"
