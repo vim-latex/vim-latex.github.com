@@ -2,7 +2,7 @@
 " 	     File: envmacros.vim
 "      Author: Mikolaj Machowski
 "     Created: Tue Apr 23 08:00 PM 2002 PST
-" Last Change: Fri Dec 13 12:00 PM 2002 EST
+" Last Change: Sat Dec 14 02:00 AM 2002 PST
 " 
 "  Description: mappings/menus for environments. 
 "=============================================================================
@@ -17,18 +17,18 @@ nmap <silent> <script> <plug> i
 imap <silent> <script> <C-o><plug> <Nop>
 
 " Define environments for IMAP evaluation " {{{
-let s:figure =     "\\begin{figure}[«htpb»]\<cr>\\begin{center}\<cr>\\psfig{figure=«eps file»}\<cr>\\end{center}\<cr>\\caption{«caption text»}\<cr>\\label{fig:«label»}\<cr>\\end{figure}«»"
-let s:minipage =   "\\begin{minipage}[«tb»]{«width»}\<cr>«»\<cr>\\end{minipage}«»"
-let s:picture =    "\\begin{picture}(«width», «height»)(«xoff»,«yoff»)\<cr>\\put(«xoff»,«yoff»){\\framebox(«»,«»){«»}}\<cr>\\end{picture}«»"
-let s:list =       "\\begin{list}{«label»}{«commands»}\<cr>\\item «»\<cr>\\end{list}«»"
-let s:enumerate =  "\\begin{enumerate}{«label»}{«commands»}\<cr>\\item «»\<cr>\\end{enumerate}«»"
-let s:itemize =    "\\begin{itemize}{«label»}{«commands»}\<cr>\\item «»\<cr>\\end{itemize}«»"
-let s:theindex =   "\\begin{theindex}{«label»}{«commands»}\<cr>\\item «»\<cr>\\end{theindex}«»"
-let s:trivlist =   "\\begin{trivlist}{«label»}{«commands»}\<cr>\\item «»\<cr>\\end{trivlist}«»"
-let s:table =      "\\begin{table}\<cr>\\centering\<cr>\\begin{tabular}{«dimensions»}\<cr>«»\<cr>\\end{tabular}\<cr>\\caption{«Caption text»}\<cr>\\label{tab:«label»}\<cr>\\end{table}«»"
-let s:array =      "\\leftä\<cr>\\begin{array}{«dimension»}\<cr>«elements»\<cr>\\end{array}\<cr>\\right«»"
-let s:description ="\\begin{description}\<cr>\\item[«label»]«»\<cr>\\end{description}«»"
-let s:document =   "\\documentclass[«options»]{«class»}\<cr>\<cr>\\begin{document}\<cr>«»\<cr>\\end{document}"
+let s:figure =     "\\begin{figure}[<+htpb+>]\<cr>\\begin{center}\<cr>\\psfig{figure=<+eps file+>}\<cr>\\end{center}\<cr>\\caption{<+caption text+>}\<cr>\\label{fig:<+label+>}\<cr>\\end{figure}<++>"
+let s:minipage =   "\\begin{minipage}[<+tb+>]{<+width+>}\<cr><++>\<cr>\\end{minipage}<++>"
+let s:picture =    "\\begin{picture}(<+width+>, <+height+>)(<+xoff+>,<+yoff+>)\<cr>\\put(<+xoff+>,<+yoff+>){\\framebox(<++>,<++>){<++>}}\<cr>\\end{picture}<++>"
+let s:list =       "\\begin{list}{<+label+>}{<+commands+>}\<cr>\\item <++>\<cr>\\end{list}<++>"
+let s:enumerate =  "\\begin{enumerate}{<+label+>}{<+commands+>}\<cr>\\item <++>\<cr>\\end{enumerate}<++>"
+let s:itemize =    "\\begin{itemize}{<+label+>}{<+commands+>}\<cr>\\item <++>\<cr>\\end{itemize}<++>"
+let s:theindex =   "\\begin{theindex}{<+label+>}{<+commands+>}\<cr>\\item <++>\<cr>\\end{theindex}<++>"
+let s:trivlist =   "\\begin{trivlist}{<+label+>}{<+commands+>}\<cr>\\item <++>\<cr>\\end{trivlist}<++>"
+let s:table =      "\\begin{table}\<cr>\\centering\<cr>\\begin{tabular}{<+dimensions+>}\<cr><++>\<cr>\\end{tabular}\<cr>\\caption{<+Caption text+>}\<cr>\\label{tab:<+label+>}\<cr>\\end{table}<++>"
+let s:array =      "\\left<++>\<cr>\\begin{array}{<+dimension+>}\<cr><+elements+>\<cr>\\end{array}\<cr>\\right<++>"
+let s:description ="\\begin{description}\<cr>\\item[<+label+>]<++>\<cr>\\end{description}<++>"
+let s:document =   "\\documentclass[<+options+>]{<+class+>}\<cr>\<cr>\\begin{document}\<cr><++>\<cr>\\end{document}"
 
 " }}}
 " define environments with special behavior in line wise selection. {{{
@@ -73,7 +73,7 @@ function! <SID>Tex_EnvMacros(lhs, submenu, name)
 		let location = location.a:lhs.'\ ('.vlhs.')'
 
 		if g:Tex_EnvironmentMaps && !exists('s:doneOnce')
-			call Tex_IMAP (a:lhs, '\begin{'.a:name."}\<CR>".extra."«»\<CR>\\end{".a:name."}«»", 'tex')
+			call Tex_IMAP (a:lhs, '\begin{'.a:name."}\<CR>".extra."<++>\<CR>\\end{".a:name."}<++>", 'tex')
 			exec 'vnoremap <silent> '.vlhs.' '.vrhs
 		endif
 
@@ -137,14 +137,14 @@ function! <SID>Tex_SectionMacros(lhs, name)
 
 	if g:Tex_SectionMaps && !exists('s:doneOnce')
 		exe 'vnoremap '.vlhs.' '.vrhs
-		call Tex_IMAP (a:lhs, "\\".a:name.'{«»}«»', 'tex')
+		call Tex_IMAP (a:lhs, "\\".a:name.'{<++>}<++>', 'tex')
 	endif
 
 	if g:Tex_Menus && g:Tex_SectionMenus
 		let location = g:Tex_EnvMenuLocation.'Sections.'.a:name.'<tab>'.a:lhs.'\ ('.vlhs.')'
 		let advlocation = g:Tex_EnvMenuLocation.'Sections.Advanced.'.a:name
 
-		let irhs = "\<C-r>=Tex_PutTextWithMovement('\\".a:name."{«»}«»')\<CR>"
+		let irhs = "\<C-r>=Tex_PutTextWithMovement('\\".a:name."{<++>}<++>')\<CR>"
 
 		let advirhs = "\<C-r>=Tex_InsSecAdv('".a:name."')\<CR>"
 		let advvrhs = "\<C-\\>\<C-N>:call Tex_VisSecAdv('".a:name."')\<CR>"
@@ -158,16 +158,16 @@ function! <SID>Tex_SectionMacros(lhs, name)
 endfunction " }}}
 
 " NewEnvironments {{{
-call s:Tex_SpecialMacros('', '', 'newenvironment',     '\newenvironment{«»}[«»][«»]{«»}{«»}«»', 0)
-call s:Tex_SpecialMacros('', '', 'newenvironment*',    '\newenvironment*{«»}[«»][«»]{«»}{«»}«»', 0)
-call s:Tex_SpecialMacros('', '', 'renewenvironment',   '\renewenvironment{«»}[«»][«»]{«»}{«»}«»', 0)
-call s:Tex_SpecialMacros('', '', 'renewenvironment*',  '\renewenvironment*{«»}[«»][«»]{«»}{«»}«»', 0)
+call s:Tex_SpecialMacros('', '', 'newenvironment',     '\newenvironment{<++>}[<++>][<++>]{<++>}{<++>}<++>', 0)
+call s:Tex_SpecialMacros('', '', 'newenvironment*',    '\newenvironment*{<++>}[<++>][<++>]{<++>}{<++>}<++>', 0)
+call s:Tex_SpecialMacros('', '', 'renewenvironment',   '\renewenvironment{<++>}[<++>][<++>]{<++>}{<++>}<++>', 0)
+call s:Tex_SpecialMacros('', '', 'renewenvironment*',  '\renewenvironment*{<++>}[<++>][<++>]{<++>}{<++>}<++>', 0)
 call s:Tex_SpecialMacros('', '', '-sepenv0-', ' :', 0)
 " }}}
 " Environments specific commands {{{
 call s:Tex_SpecialMacros('', 'Env&Commands.&Lists.', '&item',     '\item', 0)
-call s:Tex_SpecialMacros('', 'Env&Commands.&Lists.', 'i&tem[]',    '\item[«»]«»', 0)
-call s:Tex_SpecialMacros('', 'Env&Commands.&Lists.', '&bibitem{}', '\bibitem{«»}«»', 0)
+call s:Tex_SpecialMacros('', 'Env&Commands.&Lists.', 'i&tem[]',    '\item[<++>]<++>', 0)
+call s:Tex_SpecialMacros('', 'Env&Commands.&Lists.', '&bibitem{}', '\bibitem{<++>}<++>', 0)
 call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '\\&=', '\=', 0)
 call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '\\&>', '\>', 0)
 call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '&\\\\', '\\', 0)
@@ -176,27 +176,27 @@ call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '\\&-', '\-', 0)
 call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', "\\\'", "\\\'", 0)
 call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '\\&`', '\`', 0)
 call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '\\&kill', '\kill', 0)
-call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '&makron\ \\CHAR=', '\«»=«»', 0)
-call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', "&aigu\ \\CHAR\'", "\\«»\'«»", 0)
-call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '&grave\ \\CHAR`', '\«»`«»', 0)
+call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '&makron\ \\CHAR=', '\<++>=<++>', 0)
+call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', "&aigu\ \\CHAR\'", "\\<++>\'<++>", 0)
+call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', '&grave\ \\CHAR`', '\<++>`<++>', 0)
 call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', 'p&ushtabs', '\pushtabs', 0)
 call s:Tex_SpecialMacros('', 'Env&Commands.&Tabbing.', 'p&optabs', '\poptabs', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.&Tabular.', '&hline', '\hline', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.&Tabular.', '&cline', '\cline', 0) 
 call s:Tex_SpecialMacros('', 'EnvCommands.&Tabular.', '&\&', '&', 0) 
 call s:Tex_SpecialMacros('', 'EnvCommands.&Tabular.', '&\\\\', '\\', 0) 
-call s:Tex_SpecialMacros('', 'EnvCommands.&Tabular.', '&multicolumn{}{}{}', '\multicolumn{«»}{«»}{«»}«»', 0)
+call s:Tex_SpecialMacros('', 'EnvCommands.&Tabular.', '&multicolumn{}{}{}', '\multicolumn{<++>}{<++>}{<++>}<++>', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&makelabels', '\makelabels', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&address', '\address', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&signature', '\signature', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&date', '\date', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '-sepenva4-', ' :', 0)
-call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&opening{}', '\opening{«»}«»', 0)
-call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&closing{}', '\closing{«»}«»', 0)
-call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&ps{}', '\ps{«»}«»', 0)
-call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', 'cc&{}', '\cc{«»}«»', 0)
-call s:Tex_SpecialMacros('', 'EnvCommands.&Slides.', '&onlyslides{}', '\onlyslides{«»}«»', 0)
-call s:Tex_SpecialMacros('', 'EnvCommands.&Slides.', '&onlynotes{}', '\onlynotes{«»}«»', 0)
+call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&opening{}', '\opening{<++>}<++>', 0)
+call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&closing{}', '\closing{<++>}<++>', 0)
+call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', '&ps{}', '\ps{<++>}<++>', 0)
+call s:Tex_SpecialMacros('', 'EnvCommands.Le&tter.', 'cc&{}', '\cc{<++>}<++>', 0)
+call s:Tex_SpecialMacros('', 'EnvCommands.&Slides.', '&onlyslides{}', '\onlyslides{<++>}<++>', 0)
+call s:Tex_SpecialMacros('', 'EnvCommands.&Slides.', '&onlynotes{}', '\onlynotes{<++>}<++>', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.&Slides.', '-sepenva5-', ' :', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.&Slides.', '&invisible', '\invisible', 0)
 call s:Tex_SpecialMacros('', 'EnvCommands.&Slides.', '&visible', '\visible', 0)
@@ -285,7 +285,7 @@ endif
 " ============================================================================== 
 " Tex_itemize: {{{
 function! Tex_itemize(env)
-	return Tex_PutTextWithMovement('\begin{'.a:env."}\<cr>\\item «»\<cr>\\end{".a:env."}«»")
+	return Tex_PutTextWithMovement('\begin{'.a:env."}\<cr>\\item <++>\<cr>\\end{".a:env."}<++>")
 endfunction
 " }}} 
 " Tex_description: {{{
@@ -295,7 +295,7 @@ function! Tex_description(env)
 		if itlabel != ''
 			let itlabel = '['.itlabel.']'
 		endif
-		return Tex_PutTextWithMovement("\\begin{description}\<cr>\\item".itlabel." «»\<cr>\\end{description}«»")
+		return Tex_PutTextWithMovement("\\begin{description}\<cr>\\item".itlabel." <++>\<cr>\\end{description}<++>")
 	else
 		return Tex_PutTextWithMovement(s:description)
 	endif
@@ -318,7 +318,7 @@ function! Tex_figure(env)
 		if pic != ''
 			let pic = '\input{'.pic."}\<cr>"
 		else
-			let pic = "ä\<cr>"
+			let pic = "<++>\<cr>"
 		endif
 		if caption != ''
 			let caption = '\caption{'.caption."}\<cr>"
@@ -371,9 +371,9 @@ function! Tex_table(env)
 		endif
 		let format = input("Format  ( l r c p{width} | @{text} )? ")
 		if format == ''
-			let format = '«»'
+			let format = '<++>'
 		endif
-		let ret = ret.foo.'{'.format."}\<cr>ä\<cr>\\end{tabular}«»\<cr>"
+		let ret = ret.foo.'{'.format."}\<cr><++>\<cr>\\end{tabular}<++>\<cr>"
 		if center == 'y'
 			let ret=ret."\\end{center}\<cr>"
 		endif
@@ -383,7 +383,7 @@ function! Tex_table(env)
 		if label != ''
 			let ret=ret.'\label{tab:'.label."}\<cr>"
 		endif
-		let ret=ret.'\end{table}«»'
+		let ret=ret.'\end{table}<++>'
 		return Tex_PutTextWithMovement(ret)
 	else
 		return Tex_PutTextWithMovement(s:table)
@@ -401,9 +401,9 @@ function! Tex_tabular(env)
 		if format != ''
 		  let format = '{'.format.'}'
 		endif
-		return Tex_PutTextWithMovement('\begin{'.a:env.'}'.pos.format."\<cr> \<cr>\\end{".a:env.'}«»')
+		return Tex_PutTextWithMovement('\begin{'.a:env.'}'.pos.format."\<cr> \<cr>\\end{".a:env.'}<++>')
 	else
-		return Tex_PutTextWithMovement('\begin{'.a:env.'}[«position»]{«format»}'."\<cr>«»\<cr>\\end{".a:env.'}«»')
+		return Tex_PutTextWithMovement('\begin{'.a:env.'}[<+position+>]{<+format+>}'."\<cr><++>\<cr>\\end{".a:env.'}<++>')
 	endif
 endfunction
 " }}} 
@@ -420,14 +420,14 @@ function! Tex_eqnarray(env)
 		else
 			let arrlabel = ''
 		endif
-		return Tex_PutTextWithMovement('\begin{'.a:env."}\<cr>".arrlabel."«»\<cr>\\end{".a:env."}«»")
+		return Tex_PutTextWithMovement('\begin{'.a:env."}\<cr>".arrlabel."<++>\<cr>\\end{".a:env."}<++>")
 	else
 		if a:env !~ '\*'
-			let arrlabel = '\label{«»}«»'
+			let arrlabel = '\label{<++>}<++>'
 		else
-			let arrlabel = '«»'
+			let arrlabel = '<++>'
 		endif
-		return Tex_PutTextWithMovement('\begin{'.a:env."}\<cr>".arrlabel."\<cr>".'\end{'.a:env.'}«»')
+		return Tex_PutTextWithMovement('\begin{'.a:env."}\<cr>".arrlabel."\<cr>".'\end{'.a:env.'}<++>')
 	endif
 endfunction
 " }}} 
@@ -444,7 +444,7 @@ function! Tex_list(env)
 		else
 			let label = ''
 		endif
-		return Tex_PutTextWithMovement('\begin{list}'.label."\<cr>\\item \<cr>\\end{list}«»")
+		return Tex_PutTextWithMovement('\begin{list}'.label."\<cr>\\item \<cr>\\end{list}<++>")
 	else
 		return Tex_PutTextWithMovement(s:list)
 	endif
@@ -461,7 +461,7 @@ function! Tex_document(env)
 		else
 			let foo = foo.'['.opts.']'.'{'.dstyle.'}'
 		endif
-		return Tex_PutTextWithMovement(foo."\<cr>\<cr>\\begin{document}\<cr>«»\<cr>\\end{document}")
+		return Tex_PutTextWithMovement(foo."\<cr>\<cr>\\begin{document}\<cr><++>\<cr>\\end{document}")
 	else
 		return Tex_PutTextWithMovement(s:document)
 	endif
@@ -478,7 +478,7 @@ function! Tex_minipage(env)
 		else
 			let  foo = foo.'['.pos.']{'.width.'}'
 		endif
-		return Tex_PutTextWithMovement(foo."\<cr>«»\<cr>\\end{minipage}«»")
+		return Tex_PutTextWithMovement(foo."\<cr><++>\<cr>\\end{minipage}<++>")
 	else
 		return Tex_PutTextWithMovement(s:minipage)
 	endif
@@ -496,7 +496,7 @@ function! Tex_thebibliography(env)
         let bar = bar.'['.biblabel.']'
     endif
     let bar = bar.'{'.key.'}'
-    return Tex_PutTextWithMovement('\begin{thebibliography}'.foo."\<cr>".bar." \<cr>\\end{thebibliography}«»\<Up>")
+    return Tex_PutTextWithMovement('\begin{thebibliography}'.foo."\<cr>".bar." \<cr>\\end{thebibliography}<++>\<Up>")
 endfunction
 " }}} 
 
@@ -579,11 +579,11 @@ function! Tex_PutEnvironment(env)
 	elseif exists('*Tex_'.a:env)
 		exe 'return Tex_'.a:env.'(a:env)'
 	elseif a:env == '$$'
-		return Tex_PutTextWithMovement('$$«»$$')
+		return Tex_PutTextWithMovement('$$<++>$$')
 	elseif a:env == '['
-		return Tex_PutTextWithMovement("\\[\<CR>«»\<CR>\\]«»")
+		return Tex_PutTextWithMovement("\\[\<CR><++>\<CR>\\]<++>")
 	else
-        return Tex_PutTextWithMovement('\begin{'.a:env."}\<cr>«»\<cr>\\end{".a:env."}«»")
+        return Tex_PutTextWithMovement('\begin{'.a:env."}\<cr><++>\<cr>\\end{".a:env."}<++>")
 	endif
 endfunction " }}}
 " Mapping the <F5> key to insert/prompt for an environment/package {{{

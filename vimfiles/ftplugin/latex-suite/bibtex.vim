@@ -2,7 +2,7 @@
 " 	       File: bibtex.vim
 "      Function: BibT
 "        Author: Alan G Isaac <aisaac@american.edu>
-"   Last Change: Fri Dec 13 12:00 PM 2002 EST
+"   Last Change: Sat Dec 14 01:00 AM 2002 PST
 "=============================================================================
 
 if exists('s:done')
@@ -43,7 +43,7 @@ function BibT(type, options, prompt)
 	let fields = ''
 	let extras=""
 	let retval = ""
-	let key='«key»'
+	let key='<+key+>'
 
 	" characterize entry types
 	if choosetype ==? "article"
@@ -247,8 +247,8 @@ function BibT(type, options, prompt)
 			let retval = retval.'isbn = {' . isbn . '},'."\n"
 		endif
 	endif
-	let retval = retval.'otherinfo = {«»}'."\n"
-	let retval = retval."}«»"."\n"
+	let retval = retval.'otherinfo = {<++>}'."\n"
+	let retval = retval."}<++>"."\n"
 
 	return Tex_PutTextWithMovement(retval)
 endfunction
@@ -258,10 +258,10 @@ function! s:Input(prompt, ask) " {{{
 	if a:ask == 1
 		let retval = input(a:prompt)
 		if retval == ''
-			return "«»"
+			return "<++>"
 		endif
 	else
-		return "«»"
+		return "<++>"
 	endif
 endfunction 
 

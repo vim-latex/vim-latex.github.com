@@ -3,7 +3,7 @@
 "	Maintainer: Srinath Avadhanula
 "		 Email: srinath@fastmail.fm
 "		   URL: 
-"  Last Change: Fri Dec 13 12:00 PM 2002 EST
+"  Last Change: Sat Dec 14 01:00 AM 2002 PST
 "
 " Help: 
 " Changes: {{{
@@ -74,25 +74,25 @@ if !exists('s:doneMappings')
 	let s:doneMappings = 1
 	" short forms for latex formatting and math elements. {{{
 	" taken from auctex.vim or miktexmacros.vim
-	call Tex_IMAP ('__', '_{ä}«»', "tex")
-	call Tex_IMAP ('()', '(ä)«»', "tex")
-	call Tex_IMAP ('[]', '[ä]«»', "tex")
-	call Tex_IMAP ('{}', '{ä}«»', "tex")
-	call Tex_IMAP ('^^', '^{ä}«»', "tex")
-	call Tex_IMAP ('$$', '$ä$«»', "tex")
+	call Tex_IMAP ('__', '_{<++>}<++>', "tex")
+	call Tex_IMAP ('()', '(<++>)<++>', "tex")
+	call Tex_IMAP ('[]', '[<++>]<++>', "tex")
+	call Tex_IMAP ('{}', '{<++>}<++>', "tex")
+	call Tex_IMAP ('^^', '^{<++>}<++>', "tex")
+	call Tex_IMAP ('$$', '$<++>$<++>', "tex")
 	call Tex_IMAP ('==', '&=& ', "tex")
 	call Tex_IMAP ('~~', '&\approx& ', "tex")
 	call Tex_IMAP ('=~', '\approx', "tex")
 	call Tex_IMAP ('::', '\dots', "tex")
-	call Tex_IMAP ('((', '\left( ä \right)«»', "tex")
-	call Tex_IMAP ('[[', '\left[ ä \right]«»', "tex")
-	call Tex_IMAP ('{{', '\left\{ ä \right\}«»', "tex")
-	call Tex_IMAP (g:Tex_Leader.'^', '\hat{ä}«»', "tex")
-	call Tex_IMAP (g:Tex_Leader.'_', '\bar{ä}«»', "tex")
+	call Tex_IMAP ('((', '\left( <++> \right)<++>', "tex")
+	call Tex_IMAP ('[[', '\left[ <++> \right]<++>', "tex")
+	call Tex_IMAP ('{{', '\left\{ <++> \right\}<++>', "tex")
+	call Tex_IMAP (g:Tex_Leader.'^', '\hat{<++>}<++>', "tex")
+	call Tex_IMAP (g:Tex_Leader.'_', '\bar{<++>}<++>', "tex")
 	call Tex_IMAP (g:Tex_Leader.'6', '\partial', "tex")
 	call Tex_IMAP (g:Tex_Leader.'8', '\infty', "tex")
-	call Tex_IMAP (g:Tex_Leader.'/', '\frac{ä}{«»}«»', "tex")
-	call Tex_IMAP (g:Tex_Leader.'%', '\frac{ä}{«»}«»', "tex")
+	call Tex_IMAP (g:Tex_Leader.'/', '\frac{<++>}{<++>}<++>', "tex")
+	call Tex_IMAP (g:Tex_Leader.'%', '\frac{<++>}{<++>}<++>', "tex")
 	call Tex_IMAP (g:Tex_Leader.'@', '\circ', "tex")
 	call Tex_IMAP (g:Tex_Leader.'0', '^\circ', "tex")
 	call Tex_IMAP (g:Tex_Leader.'=', '\equiv', "tex")
@@ -107,29 +107,29 @@ if !exists('s:doneMappings')
 	call Tex_IMAP (g:Tex_Leader.'<', '\le', "tex")
 	call Tex_IMAP (g:Tex_Leader.'>', '\ge', "tex")
 	call Tex_IMAP (g:Tex_Leader.',', '\nonumber', "tex")
-	call Tex_IMAP (g:Tex_Leader.'~', '\tilde{ä}«»', "tex")
-	call Tex_IMAP (g:Tex_Leader.';', '\dot{ä}«»', "tex")
-	call Tex_IMAP (g:Tex_Leader.':', '\ddot{ä}«»', "tex")
-	call Tex_IMAP (g:Tex_Leader.'2', '\sqrt{ä}«»', "tex")
+	call Tex_IMAP (g:Tex_Leader.'~', '\tilde{<++>}<++>', "tex")
+	call Tex_IMAP (g:Tex_Leader.';', '\dot{<++>}<++>', "tex")
+	call Tex_IMAP (g:Tex_Leader.':', '\ddot{<++>}<++>', "tex")
+	call Tex_IMAP (g:Tex_Leader.'2', '\sqrt{<++>}<++>', "tex")
 	call Tex_IMAP (g:Tex_Leader.'|', '\Big|', "tex")
-	call Tex_IMAP (g:Tex_Leader.'I', "\\int_{ä}^{«»}«»", 'tex')
+	call Tex_IMAP (g:Tex_Leader.'I', "\\int_{<++>}^{<++>}<++>", 'tex')
 	" }}}
 	" other miscellaneous stuff taken from imaps.vim. {{{
-	call Tex_IMAP ("vb".s:ml, "\\verb|ä|«»", "tex")
-	call Tex_IMAP ("bf".s:ml, "{\\bf ä}«»", "tex")
-	call Tex_IMAP ("em".s:ml, "{\\em ä}«»", "tex")
-	call Tex_IMAP ("it".s:ml, "{\\it ä}«»", "tex")
-	call Tex_IMAP ("mb".s:ml, "\\mbox{ä}«»", "tex")
-	call Tex_IMAP ("frac".s:ml, "\\frac{ä}{«»}«»", "tex")
-	call Tex_IMAP ("sq".s:ml, "\\sqrt{ä}«»", "tex")
-	call Tex_IMAP ("eps".s:ml, "\\psfig{figure=ä.eps}«»", "tex")
-	call Tex_IMAP ("sum".s:ml, "\\sum{ä}{«»}«»", "tex")
-	call Tex_IMAP ("suml".s:ml, "\\sum\\limits_{ä}^{«»}«»", "tex")
-	call Tex_IMAP ("int".s:ml, "\\int_{ä}^{«»}«»", "tex")
-	call Tex_IMAP ("intl".s:ml, "\\int\\limits_{ä}^{«»}«»", "tex")
-	call Tex_IMAP ("bbr".s:ml, "\\left( ä \\right)«»", "tex")
-	call Tex_IMAP ("bbc".s:ml, "\\left\\{ ä \\right\\}«»", "tex")
-	call Tex_IMAP ("bbs".s:ml, "\\left[ ä \\right]«»", "tex")
+	call Tex_IMAP ("vb".s:ml, "\\verb|<++>|<++>", "tex")
+	call Tex_IMAP ("bf".s:ml, "{\\bf <++>}<++>", "tex")
+	call Tex_IMAP ("em".s:ml, "{\\em <++>}<++>", "tex")
+	call Tex_IMAP ("it".s:ml, "{\\it <++>}<++>", "tex")
+	call Tex_IMAP ("mb".s:ml, "\\mbox{<++>}<++>", "tex")
+	call Tex_IMAP ("frac".s:ml, "\\frac{<++>}{<++>}<++>", "tex")
+	call Tex_IMAP ("sq".s:ml, "\\sqrt{<++>}<++>", "tex")
+	call Tex_IMAP ("eps".s:ml, "\\psfig{figure=<++>.eps}<++>", "tex")
+	call Tex_IMAP ("sum".s:ml, "\\sum{<++>}{<++>}<++>", "tex")
+	call Tex_IMAP ("suml".s:ml, "\\sum\\limits_{<++>}^{<++>}<++>", "tex")
+	call Tex_IMAP ("int".s:ml, "\\int_{<++>}^{<++>}<++>", "tex")
+	call Tex_IMAP ("intl".s:ml, "\\int\\limits_{<++>}^{<++>}<++>", "tex")
+	call Tex_IMAP ("bbr".s:ml, "\\left( <++> \\right)<++>", "tex")
+	call Tex_IMAP ("bbc".s:ml, "\\left\\{ <++> \\right\\}<++>", "tex")
+	call Tex_IMAP ("bbs".s:ml, "\\left[ <++> \\right]<++>", "tex")
 	call Tex_IMAP ("rr".s:ml, "\\right", "tex")
 	call Tex_IMAP ("ll".s:ml, "\\left", "tex")
 	call Tex_IMAP ("part".s:ml, "\\partial", "tex")
@@ -177,7 +177,7 @@ if !exists('s:doneMappings')
 	" for the start of a double quote, otherwise when we try to write
 	" something like ``a (at the beginning of a quote), we immediately get 
 	" `\alpha. Also if there is a \ preceding the `, then do not insert a
-	" greek letter so we can insert greek letters such as \`a.
+	" greek letter so we can insert accented letters such as \`a.
 	function! TEX_InsertGreekLetter(char)
 		if a:char =~ '[a-zA-Z]' && getline('.')[col('.')-2] != '`'
 					\ && getline('.')[col('.')-2] != "\\"

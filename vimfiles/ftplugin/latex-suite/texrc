@@ -3,7 +3,7 @@
 " 	     File: texrc.vim
 "      Author: Srinath Avadhanula
 "     Created: Mon Apr 01 11:00 AM 2002 PST
-" Last Change: Fri Dec 13 09:00 AM 2002 EST
+" Last Change: Sat Dec 14 02:00 AM 2002 PST
 "
 "  Description: This file contains resource configuration information for the
 "               latex-suite package.
@@ -184,8 +184,8 @@ TexLet g:Tex_Flavor = 'latex'
 " and End characters should only be single characters. i.e, '' or ,, etc are
 " not allowed.
 TexLet g:Imap_UsePlaceHolders = 1 
-TexLet g:Imap_PlaceHolderStart = '«'
-TexLet g:Imap_PlaceHolderEnd = '»'
+TexLet g:Imap_PlaceHolderStart = '<+'
+TexLet g:Imap_PlaceHolderEnd = '+>'
 
 " }}}
 " Menu Wizard Option: {{{
@@ -220,7 +220,7 @@ TexLet g:Tex_Diacritics = 1
 " }}}
 " Leader Options: {{{
 " The mappings in latex-suite are by default prefixed with the back-tick
-" character. For example, `/ inserts \frac{«»}{«»}«» etc. You can change the
+" character. For example, `/ inserts \frac{<++>}{<++>}<++> etc. You can change the
 " prefix with the following setting.
 " ',', '/', '`' are preferred values. '' or '\' will lead to a _lot_ of
 " trouble.
@@ -236,8 +236,8 @@ TexLet g:Tex_Leader2 = ','
 " Environment Macros: {{{
 " These mappings insert LaTeX "environments" such as 
 "       \begin{center}
-"           «»
-"       \end{center}«»
+"           <++>
+"       \end{center}<++>
 " with the cursor left at the first place-holder.
 " (See |placeholders| for what these are.)
 " Mnemonic:
@@ -273,7 +273,7 @@ TexLet g:Tex_EnvironmentMenus = 1
 " }}}
 " Font Macros: {{{
 " These mappings insert font descriptions such as:
-"       \textsf{«»}«»
+"       \textsf{<++>}<++>
 " again with the cursor at the first place-holder.
 " Mnemonic:
 " 1. first letter is always F (F for font)
@@ -330,7 +330,7 @@ TexLet g:Tex_SectionMenus = 1
 " standard latex environment such as table or figure, then latex-suite will
 " insert a template with additional fields, if not, just a bare bones
 " \begin{env}
-"   «»
+"   <++>
 " \end{env} 
 " is inserted.
 " \[ and $$ are also recognized.

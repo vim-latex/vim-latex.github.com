@@ -2,7 +2,7 @@
 " 	     File: mathmacros.vim
 "      Author: Mikolaj Machowski
 "     Created: Tue Apr 23 06:00 PM 2002 PST
-" Last Change: Fri Dec 13 12:00 PM 2002 EST
+" Last Change: Sat Dec 14 01:00 AM 2002 PST
 " 
 "  Description: macros for everything mathematical in latex.
 "=============================================================================
@@ -78,15 +78,15 @@ exe s:pA1a.'nRightarrow             <plug>\nRightarrow '
 " }}}
 " MATH Fonts {{{
 let s:pA2a = s:pA."&MathFonts."
-exe s:pA2a.'mathbf{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathbf{ä}«»")<cr>'
-exe s:pA2a.'mathrm{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathrm{ä}«»")<cr>'
-exe s:pA2a.'mathsf{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathsf{ä}«»")<cr>'
-exe s:pA2a.'mathtt{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathtt{ä}«»")<cr>'
-exe s:pA2a.'mathit{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathit{ä}«»")<cr>'
-exe s:pA2a.'mathfrak{}              <plug><C-r>=Tex_PutTextWithMovement("\\mathfrak{ä}«»")<cr>'
-exe s:pA2a.'mathcal{}               <plug><C-r>=Tex_PutTextWithMovement("\\mathcal{ä}«»")<cr>'
-exe s:pA2a.'mathscr{}               <plug><C-r>=Tex_PutTextWithMovement("\\mathscr{ä}«»")<cr>'
-exe s:pA2a.'mathbb{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathbb{ä}«»")<cr>'
+exe s:pA2a.'mathbf{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathbf{<++>}<++>")<cr>'
+exe s:pA2a.'mathrm{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathrm{<++>}<++>")<cr>'
+exe s:pA2a.'mathsf{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathsf{<++>}<++>")<cr>'
+exe s:pA2a.'mathtt{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathtt{<++>}<++>")<cr>'
+exe s:pA2a.'mathit{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathit{<++>}<++>")<cr>'
+exe s:pA2a.'mathfrak{}              <plug><C-r>=Tex_PutTextWithMovement("\\mathfrak{<++>}<++>")<cr>'
+exe s:pA2a.'mathcal{}               <plug><C-r>=Tex_PutTextWithMovement("\\mathcal{<++>}<++>")<cr>'
+exe s:pA2a.'mathscr{}               <plug><C-r>=Tex_PutTextWithMovement("\\mathscr{<++>}<++>")<cr>'
+exe s:pA2a.'mathbb{}                <plug><C-r>=Tex_PutTextWithMovement("\\mathbb{<++>}<++>")<cr>'
 " }}}
 " Greek Letters small {{{
 let s:pA2 = s:pA."&Greek.&Small."
@@ -471,18 +471,18 @@ exe s:pA11.'scriptscriptstyle       <plug>\scriptscriptstyle'
 " }}}
 " {{{ MathDiacritics
 let s:pA12 = s:pA."&MathDiacritics."
-exe s:pA12.'acute{}                 <plug><C-r>=Tex_PutTextWithMovement("\\acute{ä}«»")<cr>'
-exe s:pA12.'bar{}<Tab>`_            <plug><C-r>=Tex_PutTextWithMovement("\\bar{ä}«»")<cr>'
-exe s:pA12.'breve{}                 <plug><C-r>=Tex_PutTextWithMovement("\\breve{ä}«»")<cr>'
-exe s:pA12.'check{}                 <plug><C-r>=Tex_PutTextWithMovement("\\check{ä}«»")<cr>'
-exe s:pA12.'ddot{}<Tab>`:           <plug><C-r>=Tex_PutTextWithMovement("\\ddot{ä}«»")<cr>'
-exe s:pA12.'dot{}<Tab>`;            <plug><C-r>=Tex_PutTextWithMovement("\\dot{ä}«»")<cr>'
-exe s:pA12.'grave{}                 <plug><C-r>=Tex_PutTextWithMovement("\\grave{ä}«»")<cr>'
-exe s:pA12.'hat{}<Tab>`^            <plug><C-r>=Tex_PutTextWithMovement("\\hat{ä}«»")<cr>'
-exe s:pA12.'tilde{}<tab>`~          <plug><C-r>=Tex_PutTextWithMovement("\\tilde{ä}«»")<cr>'
-exe s:pA12.'vec{}                   <plug><C-r>=Tex_PutTextWithMovement("\\vec{ä}«»")<cr>'
-exe s:pA12.'widehat{}               <plug><C-r>=Tex_PutTextWithMovement("\\widehat{ä}«»")<cr>'
-exe s:pA12.'widetilde{}             <plug><C-r>=Tex_PutTextWithMovement("\\widetilde{ä}«»")<cr>'
+exe s:pA12.'acute{}                 <plug><C-r>=Tex_PutTextWithMovement("\\acute{<++>}<++>")<cr>'
+exe s:pA12.'bar{}<Tab>`_            <plug><C-r>=Tex_PutTextWithMovement("\\bar{<++>}<++>")<cr>'
+exe s:pA12.'breve{}                 <plug><C-r>=Tex_PutTextWithMovement("\\breve{<++>}<++>")<cr>'
+exe s:pA12.'check{}                 <plug><C-r>=Tex_PutTextWithMovement("\\check{<++>}<++>")<cr>'
+exe s:pA12.'ddot{}<Tab>`:           <plug><C-r>=Tex_PutTextWithMovement("\\ddot{<++>}<++>")<cr>'
+exe s:pA12.'dot{}<Tab>`;            <plug><C-r>=Tex_PutTextWithMovement("\\dot{<++>}<++>")<cr>'
+exe s:pA12.'grave{}                 <plug><C-r>=Tex_PutTextWithMovement("\\grave{<++>}<++>")<cr>'
+exe s:pA12.'hat{}<Tab>`^            <plug><C-r>=Tex_PutTextWithMovement("\\hat{<++>}<++>")<cr>'
+exe s:pA12.'tilde{}<tab>`~          <plug><C-r>=Tex_PutTextWithMovement("\\tilde{<++>}<++>")<cr>'
+exe s:pA12.'vec{}                   <plug><C-r>=Tex_PutTextWithMovement("\\vec{<++>}<++>")<cr>'
+exe s:pA12.'widehat{}               <plug><C-r>=Tex_PutTextWithMovement("\\widehat{<++>}<++>")<cr>'
+exe s:pA12.'widetilde{}             <plug><C-r>=Tex_PutTextWithMovement("\\widetilde{<++>}<++>")<cr>'
 exe s:pA12.'imath                   <plug><C-r>=Tex_PutTextWithMovement("\\imath")<cr>'
 exe s:pA12.'jmath                   <plug><C-r>=Tex_PutTextWithMovement("\\jmath")<cr>'
 " }}}
