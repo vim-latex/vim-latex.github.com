@@ -102,6 +102,7 @@ TexLet g:Tex_MultipleCompileFormats = 'dvi'
 " but it is known that it can sometimes give different results in the output,
 " so use it with care.
 TexLet g:Tex_CompileRule_dvi = 'latex -interaction=nonstopmode $*'
+TexLet g:Tex_EscapeChars = '{}\'
 
 TexLet g:Tex_CompileRule_ps = 'dvips -Ppdf -o $*.ps $*.dvi'
 
