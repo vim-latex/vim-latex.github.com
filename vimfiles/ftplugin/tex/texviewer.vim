@@ -169,7 +169,7 @@ endfunction " }}}
 
 " Tex_CompleteWord: inserts a word at the chosen location {{{
 " Description: 
-function! <SID>Tex_CompleteWord(completeword)
+function! Tex_CompleteWord(completeword)
 	exe s:pos
 
 	" Complete word, check if add closing }
